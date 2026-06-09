@@ -38,26 +38,66 @@ Rotating servos 90 degrees and getting the entire structure fully assembled and 
 
 # Build Progress
 
+**Day 1**
+
 ![nano board setup](nano-board-setup.png)
 
 set up the nano board and shield for my base, also connected my servo into it along with battery case. went to building because i do not have the right port in my computer to get arduino set up and connected.
+
+**Day 2**
+
+![code screenshot](code-screenshot.png)
+
+created program to rotate servos to what ever value is preferenced. for me i did 90 degrees.
+
+![build progress day 2](build-progress-day2.png)
+
+replaced the nano shield after i realized the original one didnt have battery installed, as i needed more power.
 
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
 # Code
-Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
+
+## Adjust Servo Rotation Angle
+
+Reads a digit (1–9) from the serial monitor and maps it to a servo angle (20–180°). Sends the corresponding PWM pulse 50 times to hold the position.
 
 ```c++
+int servopin = 10;  // servo signal line on digital pin 10
+int myangle;        // angle variable (0–180)
+int pulsewidth;     // pulse width variable
+int val;            // serial input digit (0–9)
+
+void servopulse(int servopin, int myangle) {
+  pulsewidth = (myangle * 11) + 500;
+  digitalWrite(servopin, HIGH);
+  delayMicroseconds(pulsewidth);
+  digitalWrite(servopin, LOW);
+  delay(20 - pulsewidth / 1000);
+}
+
 void setup() {
-  // put your setup code here, to run once:
+  pinMode(servopin, OUTPUT);
   Serial.begin(9600);
-  Serial.println("Hello World!");
+  Serial.println("servo=o_seral_simple ready");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  val = Serial.read();
 
+  if (val > '0' && val <= '9') {
+    val = val - '0';
+    val = val * (180 / 9);
+
+    Serial.print("moving servo to ");
+    Serial.print(val, DEC);
+    Serial.println();
+
+    for (int i = 0; i <= 50; i++) {
+      servopulse(servopin, val);
+    }
+  }
 }
 ```
 
