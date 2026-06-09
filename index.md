@@ -16,7 +16,7 @@ A 3-jointed robotic arm that draws portraits from webcam input. The arm uses inv
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/F7M7imOVGug" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-Modification milestone — adding the portrait-drawing CV pipeline on top of the base arm.
+Modification milestone adding the portrait-drawing CV pipeline on top of the base arm.
 
 
 
@@ -26,7 +26,7 @@ Modification milestone — adding the portrait-drawing CV pipeline on top of the
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/y3VAmNlER5Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-Getting to start coding — writing the servo control logic and beginning the software side of the project.
+Getting to start coding writing the servo control logic and beginning the software side of the project.
 
 # First Milestone
 
@@ -42,17 +42,17 @@ Rotating servos 90 degrees and getting the entire structure fully assembled and 
 
 ![nano board setup](nano-board-setup.png)
 
-set up the nano board and shield for my base, also connected my servo into it along with battery case. went to building because i do not have the right port in my computer to get arduino set up and connected.
+Set up the nano board and shield for my base, also connected my servo into it along with battery case. Went to building because I do not have the right port in my computer to get arduino set up and connected.
 
 **Day 2**
 
 ![code screenshot](code-screenshot.png)
 
-created program to rotate servos to what ever value is preferenced. for me i did 90 degrees.
+Created program to rotate servos to what ever value is preferenced. For me I did 90 degrees.
 
 ![build progress day 2](build-progress-day2.png)
 
-replaced the nano shield after i realized the original one didnt have battery installed, as i needed more power.
+Replaced the nano shield after I realized the original one didnt have battery installed, as I needed more power.
 
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
@@ -61,13 +61,13 @@ Here's where you'll put images of your schematics. [Tinkercad](https://www.tinke
 
 ## Adjust Servo Rotation Angle
 
-Reads a digit (1–9) from the serial monitor and maps it to a servo angle (20–180°). Sends the corresponding PWM pulse 50 times to hold the position.
+Reads a digit (1 to 6) from the serial monitor and maps it to a servo angle in 30 degree increments (30, 60, 90, 120, 150, 180). Sends the corresponding PWM pulse 50 times to hold the position.
 
 ```c++
 int servopin = 10;  // servo signal line on digital pin 10
-int myangle;        // angle variable (0–180)
+int myangle;        // angle variable (0 to 180)
 int pulsewidth;     // pulse width variable
-int val;            // serial input digit (0–9)
+int val;            // serial input digit (1 to 6)
 
 void servopulse(int servopin, int myangle) {
   pulsewidth = (myangle * 11) + 500;
@@ -86,9 +86,9 @@ void setup() {
 void loop() {
   val = Serial.read();
 
-  if (val > '0' && val <= '9') {
+  if (val > '0' && val <= '6') {
     val = val - '0';
-    val = val * (180 / 9);
+    val = val * 30;
 
     Serial.print("moving servo to ");
     Serial.print(val, DEC);
