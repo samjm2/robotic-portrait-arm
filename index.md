@@ -54,6 +54,12 @@ Created program to rotate servos to what ever value is preferenced. For me I did
 
 Replaced the nano shield after I realized the original one didnt have battery installed, as I needed more power.
 
+**Day 3**
+
+![build progress day 3](build-progress-day3.png)
+
+Continued building; the arm structure is forming now.
+
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
