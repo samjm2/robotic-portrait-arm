@@ -60,10 +60,156 @@ Replaced the nano shield after I realized the original one didnt have battery in
 
 Continued building; the arm structure is forming now.
 
+**Day 4**
+
+![arm build 1](arm-build-day4-1.png)
+
+Finished the arm and connected the wiring for the entire structure. Wrote arm code to control the servos via dual joystick.
+
+![arm build 2](arm-build-day4-2.png)
+
+Finished the arm and connected the wiring for the entire structure. Wrote arm code to control the servos via dual joystick.
+
+![fried shield](fried-shield.png)
+
+The fried nano shield is not very visible here, but I burned it out and had to replace it with a new one.
+
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
 # Code
+
+## Joystick Arm Control
+
+Dual-joystick controller for the full arm — left joystick controls vertical and horizontal rotation, right joystick controls the claw. Supports capture and playback of action sequences via the right joystick Y-axis. A buzzer confirms each stored action.
+
+```c++
+#include "CokoinoArm.h"
+
+// ── Pin Configuration ────────────────────────────────────────────────────────
+#define BUZZER_PIN      9
+#define SERVO_BASE      4
+#define SERVO_SHOULDER  5
+#define SERVO_ELBOW     6
+#define SERVO_CLAW      7
+#define JOY_XL          A0
+#define JOY_YL          A1
+#define JOY_XR          A2
+#define JOY_YR          A3
+
+// ── Action Buffer ────────────────────────────────────────────────────────────
+static const uint8_t ACT_MAX = 10;
+int act[ACT_MAX][4];
+int num    = 0;
+int num_do = 0;
+
+CokoinoArm arm;
+int xL, yL, xR, yR;
+
+void date_processing(int *x, int *y) {
+  if (abs(512 - *x) > abs(512 - *y))  *y = 512;
+  else                                  *x = 512;
+}
+
+// ── Vertical Control  (Left Joystick X-axis) ────────────────────────────────
+void turnUD(void) {
+  if (xL == 512) return;
+  if      (xL >=   0 && xL <= 100) { arm.up(10);   return; }
+  if      (xL >  100 && xL <= 200) { arm.up(20);   return; }
+  if      (xL >  200 && xL <= 300) { arm.up(25);   return; }
+  if      (xL >  300 && xL <= 400) { arm.up(30);   return; }
+  if      (xL >  400 && xL <= 480) { arm.up(35);   return; }
+  if      (xL >  540 && xL <= 600) { arm.down(35); return; }
+  if      (xL >  600 && xL <= 700) { arm.down(30); return; }
+  if      (xL >  700 && xL <= 800) { arm.down(25); return; }
+  if      (xL >  800 && xL <= 900) { arm.down(20); return; }
+  if      (xL >  900)              { arm.down(10); return; }
+}
+
+// ── Horizontal Control  (Left Joystick Y-axis) ───────────────────────────────
+void turnLR(void) {
+  if (yL == 512) return;
+  if      (yL >=   0 && yL <= 100) { arm.right(0);  return; }
+  if      (yL >  100 && yL <= 200) { arm.right(5);  return; }
+  if      (yL >  200 && yL <= 300) { arm.right(10); return; }
+  if      (yL >  300 && yL <= 400) { arm.right(15); return; }
+  if      (yL >  400 && yL <= 480) { arm.right(20); return; }
+  if      (yL >  540 && yL <= 600) { arm.left(20);  return; }
+  if      (yL >  600 && yL <= 700) { arm.left(15);  return; }
+  if      (yL >  700 && yL <= 800) { arm.left(10);  return; }
+  if      (yL >  800 && yL <= 900) { arm.left(5);   return; }
+  if      (yL >  900)              { arm.left(0);   return; }
+}
+
+// ── Claw Control  (Right Joystick X-axis) ───────────────────────────────────
+void turnCO(void) {
+  if (xR == 512) return;
+  if      (xR >=   0 && xR <= 100) { arm.close(0);  return; }
+  if      (xR >  100 && xR <= 200) { arm.close(5);  return; }
+  if      (xR >  200 && xR <= 300) { arm.close(10); return; }
+  if      (xR >  300 && xR <= 400) { arm.close(15); return; }
+  if      (xR >  400 && xR <= 480) { arm.close(20); return; }
+  if      (xR >  540 && xR <= 600) { arm.open(20);  return; }
+  if      (xR >  600 && xR <= 700) { arm.open(15);  return; }
+  if      (xR >  700 && xR <= 800) { arm.open(10);  return; }
+  if      (xR >  800 && xR <= 900) { arm.open(5);   return; }
+  if      (xR >  900)              { arm.open(0);   return; }
+}
+
+void buzzer(int H, int L) {
+  while (yR < 420) {
+    digitalWrite(BUZZER_PIN, HIGH); delayMicroseconds(H);
+    digitalWrite(BUZZER_PIN, LOW);  delayMicroseconds(L);
+    yR = arm.JoyStickR.read_y();
+  }
+  while (yR > 600) {
+    digitalWrite(BUZZER_PIN, HIGH); delayMicroseconds(H);
+    digitalWrite(BUZZER_PIN, LOW);  delayMicroseconds(L);
+    yR = arm.JoyStickR.read_y();
+  }
+}
+
+void C_action(void) {
+  if (yR <= 800) return;
+  int *p = arm.captureAction();
+  for (uint8_t i = 0; i < 4; i++) { act[num][i] = *p++; }
+  num_do = ++num;
+  if (num >= ACT_MAX) { num = 0; buzzer(600, 400); }
+  while (yR > 600) { yR = arm.JoyStickR.read_y(); }
+}
+
+void Do_action(void) {
+  if (yR >= 220) return;
+  buzzer(200, 300);
+  for (int i = 0; i < num_do; i++) { arm.do_action(act[i], 15); }
+  num = 0;
+  while (yR < 420) { yR = arm.JoyStickR.read_y(); }
+  for (int i = 0; i < 2000; i++) {
+    digitalWrite(BUZZER_PIN, HIGH); delayMicroseconds(200);
+    digitalWrite(BUZZER_PIN, LOW);  delayMicroseconds(300);
+  }
+}
+
+void setup() {
+  arm.ServoAttach(SERVO_BASE, SERVO_SHOULDER, SERVO_ELBOW, SERVO_CLAW);
+  arm.JoyStickAttach(JOY_XL, JOY_YL, JOY_XR, JOY_YR);
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+void loop() {
+  xL = arm.JoyStickL.read_x();
+  yL = arm.JoyStickL.read_y();
+  xR = arm.JoyStickR.read_x();
+  yR = arm.JoyStickR.read_y();
+  date_processing(&xL, &yL);
+  date_processing(&xR, &yR);
+  turnUD();
+  turnLR();
+  turnCO();
+  C_action();
+  Do_action();
+}
+```
 
 ## Adjust Servo Rotation Angle
 
