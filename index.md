@@ -211,6 +211,84 @@ void loop() {
 }
 ```
 
+## Inverse Kinematics — Autonomous Arm Control (Python)
+
+Takes a target (x, y, z) coordinate in cm, calculates the required base, shoulder, and elbow servo angles using 2-link IK math, and sends them to the Arduino over serial. This is the foundation of the portrait-drawing modification.
+
+```python
+import numpy as np
+import serial
+import time
+
+# ── Link lengths (measure and update these) ──────────────────────────────────
+L1 = 10.0  # shoulder to elbow (cm)
+L2 = 10.0  # elbow to pen tip (cm)
+
+# ── Serial connection to Arduino ─────────────────────────────────────────────
+ser = serial.Serial('/dev/tty.usbserial-XXXX', 9600)  # update port
+time.sleep(2)
+
+# ── Inverse Kinematics ───────────────────────────────────────────────────────
+def ik(x, y, z):
+    base = np.degrees(np.arctan2(y, x))
+    r = np.sqrt(x**2 + y**2)
+    D = (r**2 + z**2 - L1**2 - L2**2) / (2 * L1 * L2)
+    if abs(D) > 1:
+        return None
+    elbow    = np.degrees(np.arctan2(-np.sqrt(1 - D**2), D))
+    shoulder = np.degrees(np.arctan2(z, r) - np.arctan2(L2 * np.sin(np.radians(elbow)), L1 + L2 * np.cos(np.radians(elbow))))
+    base     = max(0, min(180, base))
+    shoulder = max(0, min(180, shoulder))
+    elbow    = max(0, min(180, elbow + 90))
+    return int(base), int(shoulder), int(elbow)
+
+# ── Send angles to Arduino ───────────────────────────────────────────────────
+def move_to(x, y, z):
+    angles = ik(x, y, z)
+    if angles is None:
+        print(f"Point ({x},{y},{z}) out of reach")
+        return
+    base, shoulder, elbow = angles
+    ser.write(f"{base},{shoulder},{elbow}\n".encode())
+    time.sleep(0.5)
+
+# ── Test move ────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    move_to(10, 0, 5)
+    move_to(8,  4, 5)
+    move_to(0,  0, 10)
+```
+
+## Arduino Serial Receiver
+
+Receives base, shoulder, and elbow angles from the Python IK solver over serial and moves the servos accordingly.
+
+```c++
+#include <Servo.h>
+
+Servo base, shoulder, elbow;
+
+void setup() {
+  Serial.begin(9600);
+  base.attach(4);
+  shoulder.attach(5);
+  elbow.attach(6);
+}
+
+void loop() {
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    int b = cmd.substring(0, cmd.indexOf(',')).toInt();
+    cmd = cmd.substring(cmd.indexOf(',') + 1);
+    int s = cmd.substring(0, cmd.indexOf(',')).toInt();
+    int e = cmd.substring(cmd.indexOf(',') + 1).toInt();
+    base.write(b);
+    shoulder.write(s);
+    elbow.write(e);
+  }
+}
+```
+
 ## Adjust Servo Rotation Angle
 
 Reads a digit (1 to 6) from the serial monitor and maps it to a servo angle in 30 degree increments (30, 60, 90, 120, 150, 180). Sends the corresponding PWM pulse 50 times to hold the position.
