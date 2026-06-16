@@ -74,6 +74,12 @@ Finished the arm and connected the wiring for the entire structure. Wrote arm co
 
 The fried nano shield is not very visible here, but I burned it out and had to replace it with a new one.
 
+**Day 6–7**
+
+![pen holder iteration 1](pen-holder-v1.png)
+
+Iteration 1 of the 3D printed Sharpie pen holder. The screw holes were not threaded, which made it difficult to secure the clamp to the claw. The clamp was also too short to grip the Sharpie properly. For iteration 2, the plan is to make the clamp longer, add threaded screw holes, and tighten the Sharpie hole diameter for a more secure fit.
+
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
@@ -286,6 +292,104 @@ void loop() {
     shoulder.write(s);
     elbow.write(e);
   }
+}
+```
+
+## 3D Print Code in OpenSCAD
+
+**Iteration 1** — Initial pen holder design. 13.1mm Sharpie hole, 30mm clamp length, basic M3 mounting holes with no threading and no counterbore.
+
+```openscad
+// Sharpie Fine Point Holder for Robot Arm
+// Units: millimeters
+
+$fn = 96;
+
+// ---------- Sharpie clamp ----------
+sharpie_hole_d = 13.1;      // Sharpie body hole
+clamp_outer_d  = 24;        // outside diameter of holder
+clamp_len      = 30;        // height of holder
+slit_w         = 2.5;       // slit so holder can flex/grip
+
+// ---------- Mounting plate ----------
+mount_hole_spacing = 36;    // center-to-center spacing
+mount_hole_d       = 3.4;   // M3 clearance hole
+mount_plate_w      = 48;    // plate width
+mount_plate_d      = 22;    // plate depth
+mount_plate_t      = 3;     // plate thickness for M3x5mm screws
+mount_overlap      = 7;     // overlap into clamp for strength
+
+// ---------- Derived ----------
+r_outer = clamp_outer_d / 2;
+r_pen   = sharpie_hole_d / 2;
+mount_plate_y = -r_outer - mount_plate_d/2 + mount_overlap;
+
+difference() {
+    union() {
+        cylinder(d = clamp_outer_d, h = clamp_len);
+        translate([0, mount_plate_y, mount_plate_t/2])
+            cube([mount_plate_w, mount_plate_d, mount_plate_t], center = true);
+    }
+    translate([0, 0, -1])
+        cylinder(d = sharpie_hole_d, h = clamp_len + 2);
+    translate([-slit_w/2, r_pen, -1])
+        cube([slit_w, r_outer - r_pen + 4, clamp_len + 2]);
+    for (x = [-mount_hole_spacing/2, mount_hole_spacing/2]) {
+        translate([x, mount_plate_y, -1])
+            cylinder(d = mount_hole_d, h = mount_plate_t + 2);
+    }
+}
+```
+
+**Iteration 2** — Fixed the issues from iteration 1. Smaller 12.6mm hole for a tighter grip, longer 42mm clamp for better Sharpie retention, and M3 screw head counterbores so screws sit flush and threads reach properly.
+
+```openscad
+// Sharpie Fine Point Holder for Robot Arm - Revised Version
+// Units: millimeters
+
+$fn = 96;
+
+// ---------- Sharpie clamp ----------
+sharpie_hole_d = 12.6;      // smaller because 13.1mm was too loose
+clamp_outer_d  = 24;        // outside diameter of holder
+clamp_len      = 42;        // longer/deeper Sharpie grip
+slit_w         = 2.5;       // slit so holder can flex/grip
+
+// ---------- Mounting plate ----------
+mount_hole_spacing = 36;    // center-to-center spacing
+mount_hole_d       = 3.4;   // KEEP SAME: M3 screw fit was perfect
+mount_plate_w      = 48;    // plate width
+mount_plate_d      = 22;    // plate depth
+mount_plate_t      = 3;     // thick enough to print properly
+mount_overlap      = 7;     // overlap into clamp for strength
+
+// ---------- Screw head recess ----------
+screw_head_recess_d     = 6.2;  // recess for M3 screw head
+screw_head_recess_depth = 1.2;  // lets screw sit lower so threads reach better
+
+// ---------- Derived ----------
+r_outer = clamp_outer_d / 2;
+r_pen   = sharpie_hole_d / 2;
+mount_plate_y = -r_outer - mount_plate_d/2 + mount_overlap;
+
+difference() {
+    union() {
+        cylinder(d = clamp_outer_d, h = clamp_len);
+        translate([0, mount_plate_y, mount_plate_t/2])
+            cube([mount_plate_w, mount_plate_d, mount_plate_t], center = true);
+    }
+    translate([0, 0, -1])
+        cylinder(d = sharpie_hole_d, h = clamp_len + 2);
+    translate([-slit_w/2, r_pen, -1])
+        cube([slit_w, r_outer - r_pen + 4, clamp_len + 2]);
+    for (x = [-mount_hole_spacing/2, mount_hole_spacing/2]) {
+        translate([x, mount_plate_y, -1])
+            cylinder(d = mount_hole_d, h = mount_plate_t + 2);
+    }
+    for (x = [-mount_hole_spacing/2, mount_hole_spacing/2]) {
+        translate([x, mount_plate_y, mount_plate_t - screw_head_recess_depth])
+            cylinder(d = screw_head_recess_d, h = screw_head_recess_depth + 1);
+    }
 }
 ```
 
