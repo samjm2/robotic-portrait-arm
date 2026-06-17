@@ -80,6 +80,16 @@ The fried nano shield is not very visible here, but I burned it out and had to r
 
 Iteration 1 of the 3D printed Sharpie pen holder. The screw holes were not threaded, which made it difficult to secure the clamp to the claw. The clamp was also too short to grip the Sharpie properly. For iteration 2, the plan is to make the clamp longer, add threaded screw holes, and tighten the Sharpie hole diameter for a more secure fit.
 
+**Day 8**
+
+![pen holder taped](pen-holder-taped.png)
+
+3D printed attachment officially works with a little tape.
+
+![first drawing](first-drawing.png)
+
+First successful drawing test — the arm drew lines and shapes on paper using inverse kinematics and Python serial control. Each stroke is computed from (x, y, z) coordinates and sent to the Arduino as servo angles in real time.
+
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
 
@@ -293,6 +303,73 @@ void loop() {
     elbow.write(e);
   }
 }
+```
+
+## Manual Drawing — IK-Driven Stroke Control (Python)
+
+Takes hardcoded strokes as (x, y) coordinate lists, computes servo angles using inverse kinematics, and sends incremental moves to the Arduino over serial. The arm eases down to paper, traces each stroke, then lifts. This is the foundation of the portrait-drawing pipeline.
+
+```python
+import numpy as np
+import serial
+import time
+
+PORT       = '/dev/tty.usbserial-110'
+L1         = 10.0
+L2         = 10.0
+PEN_DOWN_Z = -6.0
+PEN_UP_Z   =  5.0
+
+STEP_SIZE  = 20
+STEP_DELAY = 0.05
+
+STROKES = [
+    [(7, -4), (7, 4), (13, 4), (13, -4), (7, -4)],
+    [(10, -4), (10, 4)],
+    [( 7,  0), (13,  0)],
+]
+
+def ik(x, y, z):
+    base = np.degrees(np.arctan2(y, x)) + 90
+    r = np.sqrt(x**2 + y**2)
+    D = (r**2 + z**2 - L1**2 - L2**2) / (2 * L1 * L2)
+    if abs(D) > 1:
+        return None
+    elbow_rad = np.arctan2(-np.sqrt(1 - D**2), D)
+    shoulder  = np.degrees(np.arctan2(z, r) - np.arctan2(L2 * np.sin(elbow_rad), L1 + L2 * np.cos(elbow_rad)))
+    elbow     = -np.degrees(elbow_rad)
+    base      = max(0, min(180, base))
+    shoulder  = 180 - max(0, min(180, shoulder))
+    elbow     = max(0, min(180, elbow))
+    return int(base), int(shoulder), int(elbow)
+
+current = [90, 100, 120]
+
+def move_to(x, y, z):
+    global current
+    target = ik(x, y, z)
+    if target is None:
+        return
+    b, s, e = target
+    for i in range(1, STEP_SIZE + 1):
+        cb = int(current[0] + (b - current[0]) * i / STEP_SIZE)
+        cs = int(current[1] + (s - current[1]) * i / STEP_SIZE)
+        ce = int(current[2] + (e - current[2]) * i / STEP_SIZE)
+        ser.write(f"{cb},{cs},{ce}\n".encode())
+        time.sleep(STEP_DELAY)
+    current[:] = [b, s, e]
+
+if __name__ == "__main__":
+    ser = serial.Serial(PORT, 9600)
+    time.sleep(2)
+    for stroke in STROKES:
+        x0, y0 = stroke[0]
+        move_to(x0, y0, PEN_UP_Z)
+        move_to(x0, y0, PEN_DOWN_Z)
+        for x, y in stroke:
+            move_to(x, y, PEN_DOWN_Z)
+        move_to(stroke[-1][0], stroke[-1][1], PEN_UP_Z)
+    ser.close()
 ```
 
 ## 3D Print Code in OpenSCAD
