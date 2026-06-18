@@ -305,9 +305,9 @@ void loop() {
 }
 ```
 
-## Arc Drawing — Fast Base Sweep (Python)
+## Face Drawing — Arc-Based Portrait (Python)
 
-Key discovery: the base servo can sweep smoothly when shoulder and elbow are locked at minimal pen pressure. IK-based incremental moves caused the pen to tap in dots instead of dragging. The working approach locks shoulder and elbow at the calibrated touch position (S=163, E=83), then sweeps the base fast enough that friction doesn't stall it. This draws clean arc strokes — the foundation of the portrait-drawing style.
+Built on the fast base sweep technique. Each facial feature is a separate arc stroke: eyebrows (short outer arcs), eyes (short inner arcs), nose (pen tap dot), mouth (wide arc). Shoulder and elbow stay locked at the calibrated touch pressure (S=163, E=83) for every stroke — only the base angle range changes per feature.
 
 ```python
 import serial
@@ -315,30 +315,44 @@ import time
 
 PORT = '/dev/tty.usbserial-110'
 
-S_UP,   E_UP   = 100, 110
-S_DOWN, E_DOWN = 163, 83   # calibrated: just touches paper with minimal pressure
+S_UP, E_UP = 100, 110
+S_EYE,  E_EYE  = 163, 83
+S_BROW, E_BROW = 163, 83
 
 def send(b, s, e):
     ser.write(f"{b},{s},{e}\n".encode())
     time.sleep(0.02)
 
-def ease_shoulder(b, s_start, s_end, e_start, e_end, steps=40):
+def ease(b, s_start, s_end, e_start, e_end, steps=40):
     for i in range(steps + 1):
-        s = int(s_start + (s_end - s_start) * i / steps)
-        e = int(e_start + (e_end - e_start) * i / steps)
-        send(b, s, e)
+        t = i / steps
+        send(b, int(s_start + (s_end - s_start) * t), int(e_start + (e_end - e_start) * t))
+
+def arc(b0, b1, s_dn, e_dn):
+    ease(b0, S_UP, S_UP, E_UP, E_UP, steps=25)
+    ease(b0, S_UP, s_dn, E_UP, e_dn, steps=40)
+    steps = max(30, abs(b1 - b0) * 2)
+    for i in range(int(steps)):
+        b = int(b0 + (b1 - b0) * i / (steps - 1))
+        send(b, s_dn, e_dn)
+    ease(b1, s_dn, S_UP, e_dn, E_UP, steps=40)
+
+def dot(b, s_dn, e_dn):
+    ease(b, S_UP, S_UP, E_UP, E_UP, steps=25)
+    ease(b, S_UP, s_dn, E_UP, e_dn, steps=40)
+    time.sleep(0.1)
+    ease(b, s_dn, S_UP, e_dn, E_UP, steps=40)
 
 if __name__ == "__main__":
     ser = serial.Serial(PORT, 9600)
     time.sleep(2)
 
-    ease_shoulder(65, S_UP, S_DOWN, E_UP, E_DOWN)   # ease pen down at base=65
-
-    for i in range(120):                              # fast sweep 65→115
-        b = int(65 + (115 - 65) * i / 119)
-        send(b, S_DOWN, E_DOWN)
-
-    ease_shoulder(115, S_DOWN, S_UP, E_DOWN, E_UP)  # pen up
+    arc(68, 80,   S_BROW, E_BROW)   # left eyebrow
+    arc(100, 112, S_BROW, E_BROW)   # right eyebrow
+    arc(70, 82,   S_EYE,  E_EYE)    # left eye
+    arc(98, 110,  S_EYE,  E_EYE)    # right eye
+    dot(90,       S_EYE,  E_EYE)    # nose
+    arc(74, 106,  S_EYE,  E_EYE)    # mouth
 
     ser.close()
 ```
