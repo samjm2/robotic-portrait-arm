@@ -395,6 +395,10 @@ if __name__ == "__main__":
     ser.close()
 ```
 
+![face drawing](face-drawing.png)
+
+First face drawn by the arm — eyebrows, eyes, nose dot, and mouth, each as a separate arc stroke.
+
 ## 3D Print Code in OpenSCAD
 
 **Iteration 1** — Initial pen holder design. 13.1mm Sharpie hole, 30mm clamp length, basic M3 mounting holes with no threading and no counterbore.
