@@ -305,6 +305,44 @@ void loop() {
 }
 ```
 
+## Arc Drawing — Fast Base Sweep (Python)
+
+Key discovery: the base servo can sweep smoothly when shoulder and elbow are locked at minimal pen pressure. IK-based incremental moves caused the pen to tap in dots instead of dragging. The working approach locks shoulder and elbow at the calibrated touch position (S=163, E=83), then sweeps the base fast enough that friction doesn't stall it. This draws clean arc strokes — the foundation of the portrait-drawing style.
+
+```python
+import serial
+import time
+
+PORT = '/dev/tty.usbserial-110'
+
+S_UP,   E_UP   = 100, 110
+S_DOWN, E_DOWN = 163, 83
+
+def send(b, s, e):
+    ser.write(f"{b},{s},{e}\n".encode())
+    time.sleep(0.02)
+
+def ease_shoulder(b, s_start, s_end, e_start, e_end, steps=40):
+    for i in range(steps + 1):
+        s = int(s_start + (s_end - s_start) * i / steps)
+        e = int(e_start + (e_end - e_start) * i / steps)
+        send(b, s, e)
+
+if __name__ == "__main__":
+    ser = serial.Serial(PORT, 9600)
+    time.sleep(2)
+
+    ease_shoulder(65, S_UP, S_DOWN, E_UP, E_DOWN)
+
+    for i in range(120):
+        b = int(65 + (115 - 65) * i / 119)
+        send(b, S_DOWN, E_DOWN)
+
+    ease_shoulder(115, S_DOWN, S_UP, E_DOWN, E_UP)
+
+    ser.close()
+```
+
 ## Face Drawing — Arc-Based Portrait (Python)
 
 Built on the fast base sweep technique. Each facial feature is a separate arc stroke: eyebrows (short outer arcs), eyes (short inner arcs), nose (pen tap dot), mouth (wide arc). Shoulder and elbow stay locked at the calibrated touch pressure (S=163, E=83) for every stroke — only the base angle range changes per feature.
