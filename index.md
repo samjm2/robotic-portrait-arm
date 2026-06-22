@@ -16,7 +16,7 @@ A 3-jointed robotic arm that draws portraits from webcam input. The arm uses inv
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/F7M7imOVGug" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-Modification milestone adding the portrait-drawing CV pipeline on top of the base arm.
+Finish final touches: schematics and wire management.
 
 
 
@@ -26,7 +26,7 @@ Modification milestone adding the portrait-drawing CV pipeline on top of the bas
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/y3VAmNlER5Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-Getting to start coding writing the servo control logic and beginning the software side of the project.
+Finish modifications.
 
 # First Milestone
 
