@@ -548,9 +548,10 @@ Don't forget to place the link of where to buy each component inside the quotati
 
 | **Part** | **Note** | **Price** | **Link** |
 |:--:|:--:|:--:|:--:|
-| Item Name | What the item is used for | $Price | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
-| Item Name | What the item is used for | $Price | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
-| Item Name | What the item is used for | $Price | <a href="https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6/"> Link </a> |
+| Logitech C270 Webcam, 720p, Widescreen Video Calling, Light Correction, Noise-Reducing Mic | Webcam for face capture | $17.99 | <a href="https://www.amazon.com/Logitech-Desktop-Widescreen-Calling-Recording/dp/B004FHO5Y6"> Link </a> |
+| MG90S Servo, Micro Servo Motor Metal Gear for Robot Car (2PCS) | Servos for arm joints | $10.00 | <a href="https://www.amazon.com/MG90S-Servo-Micro-Motor-Metal/dp/B086PW4JWY"> Link </a> |
+| Sharpie Permanent Markers, Fine Tip, Black, 12 Count - Quick Drying, Fade Resistant, For Wood, Plastic, Paper, Metal, And More | Drawing pen | $6.79 | <a href="https://www.amazon.com/Sharpie-Permanent-Markers-Resistant-Coloring/dp/B00006IFHD"> Link </a> |
+| Custom 3D Printed Pen Holder | Mounts Sharpie to arm end effector | $0.00 | N/A |
 
 # Other Resources/Examples
 One of the best parts about Github is that you can view how other people set up their own work. Here are some past BSE portfolios that are awesome examples. You can view how they set up their portfolio, and you can view their index.md files to understand how they implemented different portfolio components.
