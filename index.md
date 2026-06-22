@@ -90,8 +90,11 @@ Iteration 1 of the 3D printed Sharpie pen holder. The screw holes were not threa
 
 First successful drawing test — the arm drew lines and shapes on paper using inverse kinematics and Python serial control. Each stroke is computed from (x, y, z) coordinates and sent to the Arduino as servo angles in real time.
 
-# Schematics 
-Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
+# Schematics
+
+![wiring schematic](schematic.png)
+
+4 servos (SERVO1–SERVO4) connected to pins 4–7 on the Cokoino Nano shield. SERVO1 (base) is MG90S, SERVO2–4 are SG90. Power supplied by dual 18650 battery pack.
 
 # Code
 
