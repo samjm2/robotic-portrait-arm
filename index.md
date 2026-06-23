@@ -18,6 +18,8 @@ A 3-jointed robotic arm that draws portraits from webcam input. The arm uses inv
 
 **Completed the base arm build: fully assembled and wired the 3-jointed structure, wrote servo control code, and demonstrated all four servos rotating 90 degrees on command.**
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Bran1-3o-d0?si=Z8JfRbtlbdPhubwd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 # Build Progress
 
 **Day 1**
