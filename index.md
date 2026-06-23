@@ -10,13 +10,9 @@ A 3-jointed robotic arm that draws portraits from webcam input. The arm uses inv
 
 # Final Milestone
 
-**Completed final touches: wiring schematic documentation and wire management. The arm is fully documented and presentable as a finished project.**
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/F7M7imOVGug" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
-# Second Milestone
-
 **Completed the portrait-drawing modification: 3D printed and attached a custom pen holder to the arm's end effector, wrote Python inverse kinematics and serial control code, and successfully drew arc-based face sketches on paper using servo angle calculations.**
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/3efWIZrAu2I?si=BOiyodnRXiUSC_RA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 # First Milestone
 
